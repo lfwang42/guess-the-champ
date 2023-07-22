@@ -36,3 +36,19 @@
     transform: rotate(360deg);
   }
 }
+
+.canvasAndChat {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+}
+
+.canvas {
+  background-color: rgb(135, 76, 174);
+  height: 450px;
+}
+
+.messege {
+  background-color: lightblue;
+  height: 700px;
+}
+
