@@ -2,8 +2,45 @@ import "./App.css";
 import io from "socket.io-client";
 import Chat from './components/Chat'
 import { useState } from "react";
+import { useTimer } from 'react-timer-hook';
+import { ImagePixelated } from "react-pixelate"
+import src from "./img1.png"
 
 const socket = io.connect("http://localhost:3001");
+
+function MyTimer({ expiryTimestamp }) {
+  const {
+    totalSeconds,
+    seconds,
+    minutes,
+    hours,
+    days,
+    isRunning,
+    start,
+    pause,
+    resume,
+    restart,
+  } = useTimer({ expiryTimestamp, onExpire: () => console.warn('onExpire called') });
+
+
+  return (
+    <div style={{textAlign: 'center'}}>
+      <div style={{fontSize: '100px'}}>
+        <span>{minutes}</span>:<span>{seconds}</span>
+      </div>
+      <button onClick={start}>Start</button>
+      <button onClick={pause}>Pause</button>
+      <button onClick={resume}>Resume</button>
+      <button onClick={() => {
+        // Restarts to 5 minutes timer
+        const time = new Date();
+        time.setSeconds(time.getSeconds() + 300);
+        restart(time)
+      }}>Restart</button>
+    </div>
+  );
+}
+
 
 function App() {
   //Room State
@@ -17,11 +54,16 @@ function App() {
     }
   };
 
+  const time = new Date();
+  time.setSeconds(time.getSeconds() + 60);
+
   return (
     <div className="canvasAndChat">
-      <canvas className='canvas'>
+      {/* <canvas className='canvas'>
         CANVAS
-      </canvas>
+      </canvas> */}
+      <MyTimer expiryTimestamp={time} />
+      <ImagePixelated src={src} width={500} height={300} fillTransparencyColor={"grey"} pixelSize={5}/>
       <div className="messege">
         <input
           type="text"
