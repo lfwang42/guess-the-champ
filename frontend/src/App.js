@@ -8,38 +8,8 @@ import src from "./img1.png"
 
 const socket = io.connect("http://localhost:3001");
 
-function MyTimer({ expiryTimestamp }) {
-  const {
-    totalSeconds,
-    seconds,
-    minutes,
-    hours,
-    days,
-    isRunning,
-    start,
-    pause,
-    resume,
-    restart,
-  } = useTimer({ expiryTimestamp, onExpire: () => console.warn('onExpire called') });
 
 
-  return (
-    <div style={{textAlign: 'center'}}>
-      <div style={{fontSize: '100px'}}>
-        <span>{minutes}</span>:<span>{seconds}</span>
-      </div>
-      <button onClick={start}>Start</button>
-      <button onClick={pause}>Pause</button>
-      <button onClick={resume}>Resume</button>
-      <button onClick={() => {
-        // Restarts to 5 minutes timer
-        const time = new Date();
-        time.setSeconds(time.getSeconds() + 300);
-        restart(time)
-      }}>Restart</button>
-    </div>
-  );
-}
 
 
 function App() {
@@ -48,6 +18,46 @@ function App() {
   // Messages States
   const [name, setName] = useState("");
 
+  const [pixels, setPixels] = useState(20)  
+
+  function MyTimer({ expiryTimestamp }) {
+    const {
+      totalSeconds,
+      seconds,
+      minutes,
+      hours,
+      days,
+      isRunning,
+      start,
+      pause,
+      resume,
+      restart,
+    } = useTimer({ expiryTimestamp, onExpire: () => {
+      console.log("hi");
+      if (pixels >= 5) {
+        setPixels(pixels - 5);
+      }
+    } });
+  
+  
+    return (
+      <div style={{textAlign: 'center'}}>
+        <div style={{fontSize: '100px'}}>
+          <span>{minutes}</span>:<span>{seconds}</span>
+        </div>
+        <button onClick={pause}>Pause</button>
+        <button onClick={resume}>Resume</button>
+        <button onClick={() => {
+          // Restarts to 1 minutes timer
+          const time = new Date();
+          time.setSeconds(time.getSeconds() + 60);
+          restart(time)
+        }}>Restart</button>
+      </div>
+    );
+  }
+  
+
   const joinRoom = () => {
     if (room !== "") {
       socket.emit("join_room", room);
@@ -55,7 +65,7 @@ function App() {
   };
 
   const time = new Date();
-  time.setSeconds(time.getSeconds() + 60);
+  time.setSeconds(time.getSeconds() + 5);
 
   return (
     <div className="canvasAndChat">
@@ -63,7 +73,7 @@ function App() {
         CANVAS
       </canvas> */}
       <MyTimer expiryTimestamp={time} />
-      <ImagePixelated src={src} width={500} height={300} fillTransparencyColor={"grey"} pixelSize={5}/>
+      <ImagePixelated src={src} width={500} height={300} fillTransparencyColor={"grey"} pixelSize={pixels}/>
       <div className="messege">
         <input
           type="text"
