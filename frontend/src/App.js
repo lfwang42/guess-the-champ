@@ -8,41 +8,49 @@ import src from "./img1.png"
 
 const socket = io.connect("http://localhost:3001");
 
-function MyTimer({ expiryTimestamp }) {
-  const {
-    totalSeconds,
-    seconds,
-    minutes,
-    hours,
-    days,
-    isRunning,
-    start,
-    pause,
-    resume,
-    restart,
-  } = useTimer({ expiryTimestamp, onExpire: () => console.warn('onExpire called') });
-
-
-  return (
-    <div style={{textAlign: 'center'}}>
-      <div style={{fontSize: '100px'}}>
-        <span>{minutes}</span>:<span>{seconds}</span>
-      </div>
-      <button onClick={start}>Start</button>
-      <button onClick={pause}>Pause</button>
-      <button onClick={resume}>Resume</button>
-      <button onClick={() => {
-        // Restarts to 5 minutes timer
-        const time = new Date();
-        time.setSeconds(time.getSeconds() + 300);
-        restart(time)
-      }}>Restart</button>
-    </div>
-  );
-}
-
-
 function App() {
+
+  const [pixels, setPixels] = useState(20)  
+
+  function MyTimer({ expiryTimestamp }) {
+    const {
+      totalSeconds,
+      seconds,
+      minutes,
+      hours,
+      days,
+      isRunning,
+      start,
+      pause,
+      resume,
+      restart,
+    } = useTimer({ expiryTimestamp, onExpire: () => {
+      console.log("hi");
+      if (pixels >= 5) {
+        setPixels(pixels - 5);
+      }
+    } });
+
+
+    return (
+      <div style={{textAlign: 'center'}}>
+        <div style={{fontSize: '100px'}}>
+          <span>{minutes}</span>:<span>{seconds}</span>
+        </div>
+        <button onClick={pause}>Pause</button>
+        <button onClick={resume}>Resume</button>
+        <button onClick={() => {
+          // Restarts to 1 minutes timer
+          const time = new Date();
+          time.setSeconds(time.getSeconds() + 60);
+          restart(time)
+        }}>Restart</button>
+      </div>
+    );
+  }
+
+
+
   //Room State
   const [room, setRoom] = useState("");
   // Messages States
@@ -55,33 +63,51 @@ function App() {
   };
 
   const time = new Date();
-  time.setSeconds(time.getSeconds() + 60);
+  time.setSeconds(time.getSeconds() + 5);
 
   return (
-    <div className="canvasAndChat">
-      {/* <canvas className='canvas'>
-        CANVAS
-      </canvas> */}
-      <MyTimer expiryTimestamp={time} />
-      <ImagePixelated src={src} width={500} height={300} fillTransparencyColor={"grey"} pixelSize={5}/>
-      <div className="messege">
-        <input
-          type="text"
-          placeholder="Room Number..."
-          onChange={(event) => {
-            setRoom(event.target.value);
-          }}
-        />
-        <input
-          type="text"
-          placeholder="Name"
-          onChange={(event) => {
-            setName(event.target.value);
-          }}
-        />
-        <button onClick={joinRoom}> Join Room</button>
-        <Chat socket={socket} name={name} room={room}/>
+    <div className="score-canvas-chat">
+
+      <div className="scoreboard">
+        ScoreBoard
       </div>
+
+      <div className='canvas'>
+        <MyTimer expiryTimestamp={time} />
+        <ImagePixelated src={src} width={500} height={300} fillTransparencyColor={"grey"} pixelSize={pixels}/>
+      </div>
+
+      <div className="info-chat">
+
+        <div className="info">
+          <input
+            className="room-num"
+            type="text"
+            placeholder="Room Number..."
+            onChange={(event) => {
+              setRoom(event.target.value);
+            }}
+          />
+          <input
+            className="username"
+            type="text"
+            placeholder="Name"
+            onChange={(event) => {
+              setName(event.target.value);
+            }}
+          />
+          <button className="join-button" onClick={joinRoom}> Join Room</button>
+        </div>
+
+        <div className="chat">
+          <div>
+            CHATBOX
+            <Chat socket={socket} name={name} room={room}/>
+          </div>
+        </div>
+
+      </div>
+
     </div>
   );
 }
