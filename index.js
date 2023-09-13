@@ -1,12 +1,31 @@
+// import champions from "./champions.js"
+// const champions = require("lol-champions");
+const util = require("util")
+const data = require("./champions.js")
+const champions = data.champions
+// console.log(champions)
 const express = require("express");
 const app = express();
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
-
+const answer = "jhin";
 app.use(cors());
 
 const server = http.createServer(app);
+
+const selectedChamp = Math.floor(Math.random() * champions.length);
+console.log(champions[selectedChamp].name)
+// var newChamps = [];
+// console.log(champions.length);
+// for (var i = 0; i < champions.length; i++) {
+//   console.log(`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[i].url}_0.jpg`)
+//   // console.log(champions[i].url);
+// }
+
+
+// console.log(util.inspect(newChamps, { maxArrayLength: null}))
+
 
 const io = new Server(server, {
   cors: {
@@ -18,13 +37,22 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
 
+  socket.emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
   socket.on("join_room", (data) => {
     socket.join(data);
     console.log(`User ${socket.id} has joined room ${data}`)
   });
 
+
   socket.on("send_message", (data) => {
-    socket.to(data.room).emit("receive_message", data);
+    // console.log(data);
+    if (data.message.toString().toLowerCase() == answer) {
+      socket.to(data.room).emit("receive_message", "Player guessed the answer!");
+      console.log("answer");
+    }
+    else {
+      socket.to(data.room).emit("receive_message", data);
+    }
   });
 
 });
