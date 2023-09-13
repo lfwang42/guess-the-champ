@@ -1,54 +1,80 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.canvasAndChat {
+.score-canvas-chat {
   display: grid;
-  grid-template-columns: 3fr 1fr;
+  grid-template-columns: 1fr 2fr 1fr;
+  column-gap: 2em;
+  height: 900px;
+  margin: 16px 10px 16px 10px
+}
+
+.scoreboard {
+  background-color: pink;
+  height: 100%;
 }
 
 .canvas {
   background-color: rgb(135, 76, 174);
-  height: 450px;
 }
 
-.messege {
+.info-chat {
+  display: grid;
+  grid-template-rows: 1fr 8fr;
+  row-gap: 2em;
+  height: 900px;
+}
+
+.info {
   background-color: lightblue;
-  height: 700px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+  gap: 0.5em;
+  flex-wrap: wrap;
 }
 
+button {
+  height: 30px;
+  border-radius: 20px;
+  font-size: medium;
+  font-weight: 500;
+  background-color: rgb(218, 188, 124);
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: rgb(240, 227, 187);
+  transition: 0.3s;
+}
+
+input {
+  text-indent: 7px;
+  height: 30px;
+  border-radius: 20px;
+  font-size: medium;
+  font-weight: 500;
+}
+
+.chat {
+  background-color: rgb(81, 164, 212);
+  padding: 15px;
+}
+
+.author-message {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-weight: 900;
+}
+
+.chatDisplay-sendButton {
+  display: grid;
+  grid-template-rows: 18fr 1fr;
+  row-gap: 2em;
+}
+
+.chat-body{
+  background-color: rgb(144, 211, 189);
+}
+
+.message-send {
+  justify-content: center;
+  align-items: center;
+}

@@ -9,16 +9,11 @@ import src from "./img1.png"
 const socket = io.connect("http://localhost:3001");
 
 
-
-
-
 function App() {
-  //Room State
-  const [room, setRoom] = useState("");
-  // Messages States
-  const [name, setName] = useState("");
+
 
   const [pixels, setPixels] = useState(20)  
+
 
   function MyTimer({ expiryTimestamp }) {
     const {
@@ -38,8 +33,8 @@ function App() {
         setPixels(pixels - 5);
       }
     } });
-  
-  
+
+
     return (
       <div style={{textAlign: 'center'}}>
         <div style={{fontSize: '100px'}}>
@@ -56,7 +51,15 @@ function App() {
       </div>
     );
   }
-  
+
+
+
+
+  //Room State
+  const [room, setRoom] = useState("");
+  // Messages States
+  const [name, setName] = useState("");
+
 
   const joinRoom = () => {
     if (room !== "") {
@@ -68,30 +71,50 @@ function App() {
   time.setSeconds(time.getSeconds() + 5);
 
   return (
-    <div className="canvasAndChat">
-      {/* <canvas className='canvas'>
-        CANVAS
-      </canvas> */}
-      <MyTimer expiryTimestamp={time} />
-      <ImagePixelated src={src} width={500} height={300} fillTransparencyColor={"grey"} pixelSize={pixels}/>
-      <div className="messege">
-        <input
-          type="text"
-          placeholder="Room Number..."
-          onChange={(event) => {
-            setRoom(event.target.value);
-          }}
-        />
-        <input
-          type="text"
-          placeholder="Name"
-          onChange={(event) => {
-            setName(event.target.value);
-          }}
-        />
-        <button onClick={joinRoom}> Join Room</button>
-        <Chat socket={socket} name={name} room={room}/>
+
+    <div className="score-canvas-chat">
+
+      <div className="scoreboard">
+        ScoreBoard
       </div>
+
+      <div className='canvas'>
+        <MyTimer expiryTimestamp={time} />
+        <ImagePixelated src={src} width={500} height={300} fillTransparencyColor={"grey"} pixelSize={pixels}/>
+
+      </div>
+
+      <div className="info-chat">
+
+        <div className="info">
+          <input
+            className="room-num"
+            type="text"
+            placeholder="Room Number..."
+            onChange={(event) => {
+              setRoom(event.target.value);
+            }}
+          />
+          <input
+            className="username"
+            type="text"
+            placeholder="Name"
+            onChange={(event) => {
+              setName(event.target.value);
+            }}
+          />
+          <button className="join-button" onClick={joinRoom}> Join Room</button>
+        </div>
+
+        <div className="chat">
+          <div>
+            CHATBOX
+            <Chat socket={socket} name={name} room={room}/>
+          </div>
+        </div>
+
+      </div>
+
     </div>
   );
 }
