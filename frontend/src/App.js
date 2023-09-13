@@ -8,9 +8,12 @@ import src from "./img1.png"
 
 const socket = io.connect("http://localhost:3001");
 
+
 function App() {
 
+
   const [pixels, setPixels] = useState(20)  
+
 
   function MyTimer({ expiryTimestamp }) {
     const {
@@ -51,10 +54,12 @@ function App() {
 
 
 
+
   //Room State
   const [room, setRoom] = useState("");
   // Messages States
   const [name, setName] = useState("");
+
 
   const joinRoom = () => {
     if (room !== "") {
@@ -66,6 +71,7 @@ function App() {
   time.setSeconds(time.getSeconds() + 5);
 
   return (
+
     <div className="score-canvas-chat">
 
       <div className="scoreboard">
@@ -75,6 +81,7 @@ function App() {
       <div className='canvas'>
         <MyTimer expiryTimestamp={time} />
         <ImagePixelated src={src} width={500} height={300} fillTransparencyColor={"grey"} pixelSize={pixels}/>
+
       </div>
 
       <div className="info-chat">
