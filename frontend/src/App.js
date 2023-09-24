@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useTimer } from 'react-timer-hook';
 import { ImagePixelated } from "react-pixelate"
 import src from "./img1.png"
+import React from 'react'
 
 const socket = io.connect("http://localhost:3001");
 
@@ -60,6 +61,7 @@ function App() {
   // Messages States
   const [name, setName] = useState("");
 
+  const [randChamp, setRandChamp] = useState("");
 
   const joinRoom = () => {
     if (room !== "") {
@@ -69,6 +71,14 @@ function App() {
 
   const time = new Date();
   time.setSeconds(time.getSeconds() + 5);
+
+  React.useEffect(() => {
+    socket.on("champion_url", (url) => {
+      setRandChamp(url)
+    })
+  }, [])
+
+  console.log(randChamp)
 
   return (
 
@@ -80,7 +90,7 @@ function App() {
 
       <div className='canvas'>
         <MyTimer expiryTimestamp={time} />
-        <ImagePixelated src={src} width={500} height={300} fillTransparencyColor={"grey"} pixelSize={pixels}/>
+        <ImagePixelated src={randChamp} width={500} height={300} fillTransparencyColor={"grey"} pixelSize={pixels}/>
 
       </div>
 
