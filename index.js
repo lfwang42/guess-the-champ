@@ -68,7 +68,7 @@ io.on("connection", (socket) => {
       selectedChamp = Math.floor(Math.random() * champions.length);
       console.log(champions[selectedChamp].name)
       io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
-      io.to(data.room).emit("user_list",  )
+
       const room = {
         id: uuidv4(),
         name: data.room,
@@ -77,6 +77,9 @@ io.on("connection", (socket) => {
       };
       rooms.set(data.room, room);
       joinRoom(socket.id, data.user, room);
+      const users = room.sockets.map((user) => ({name: user.name}))
+      io.to(data.room).emit("user_list", users)
+      console.log(users)
       
     }
     else {
@@ -84,6 +87,8 @@ io.on("connection", (socket) => {
       console.log(champions[selectedChamp].name)
       io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
       joinRoom(socket.id, rooms.get(data.room));
+      const users = rooms.get(data.room).sockets.map((user) => ({name: user.name}))
+      io.to(data.room).emit("user_list", users)
     }
     
     //console.log([...rooms.entries()]);
