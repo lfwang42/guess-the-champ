@@ -65,8 +65,12 @@ function App() {
   const [randChamp, setRandChamp] = useState("");
 
   const joinRoom = () => {
-    if (room !== "") {
-      socket.emit("join_room", room);
+    if (room !== "" && name != "") {
+      const roomData = {
+        room: room,
+        user: name
+      };
+      socket.emit("join_room", roomData);
     }
   };
 
@@ -75,7 +79,6 @@ function App() {
 
   React.useEffect(() => {
     socket.on("champion_url", (url) => {
-      console.log("yo")
       setRandChamp(url)
     })
   }, [])
