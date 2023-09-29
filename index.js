@@ -21,10 +21,11 @@ var rooms = new Map();
 function joinRoom(socket, name, room) {
   const user = {
     socketId: socket,
-    name: name
+    name: name,
+    score: 0
   }
-  room.sockets.push(user);
-  console.log(room.sockets);
+  room.users.push(user);
+  console.log(room.users);
 }
 
 
@@ -51,14 +52,11 @@ io.on("connection", (socket) => {
       const room = {
         id: uuidv4(),
         name: data.room,
-        sockets: [],
+        users: [],
         champion: selectedChamp
       };
       rooms.set(data.room, room);
       joinRoom(socket.id, data.user, room);
-      const users = room.sockets.map((user) => ({name: user.name}))
-      io.to(data.room).emit("user_list", users)
-      console.log(users)
       
     }
     else {
@@ -66,13 +64,15 @@ io.on("connection", (socket) => {
       console.log(champions[selectedChamp].name)
       io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
       joinRoom(socket.id, data.user, rooms.get(data.room));
-      const users = rooms.get(data.room).sockets.map((user) => ({name: user.name}))
-      io.to(data.room).emit("user_list", users)
     }
     
+    const users = rooms.get(data.room).users.map((user) => ({name: user.name, score: user.score}))
     //console.log([...rooms.entries()]);
     
     console.log(`User ${socket.id} username ${data.user} has joined room ${data.room}`)
+    console.log(users)
+    io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
+
   });
 
 
