@@ -32,7 +32,6 @@ function App() {
       resume,
       restart,
     } = useTimer({ expiryTimestamp, onExpire: () => {
-      console.log("hi");
       if (pixels >= 5) {
         setPixels(pixels - 5);
       }
@@ -77,6 +76,7 @@ function App() {
 
   React.useEffect(() => {
     socket.on("champion_url", (url) => {
+      console.log("yo")
       setRandChamp(url)
     })
   }, [])
