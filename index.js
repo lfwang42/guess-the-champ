@@ -39,8 +39,12 @@ var rooms = new Map();
 
 // }
 
-function joinRoom(socket, room) {
-  room.sockets.push(socket);
+function joinRoom(socket, name, room) {
+  const user = {
+    socketId: socket,
+    name: name
+  }
+  room.sockets.push(user);
   console.log(room.sockets);
 }
 
@@ -59,31 +63,37 @@ io.on("connection", (socket) => {
 
   socket.on("join_room", (data) => {
     var selectedChamp = 0;
-    socket.join(data);
-    if (!rooms.has(data)) {
+    socket.join(data.room);
+    if (!rooms.has(data.room)) {
       selectedChamp = Math.floor(Math.random() * champions.length);
       console.log(champions[selectedChamp].name)
-      io.to(data).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
+      io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
+
       const room = {
         id: uuidv4(),
-        name: data,
+        name: data.room,
         sockets: [],
         champion: selectedChamp
       };
-      rooms.set(data, room);
-      joinRoom(socket.id, room);
+      rooms.set(data.room, room);
+      joinRoom(socket.id, data.user, room);
+      const users = room.sockets.map((user) => ({name: user.name}))
+      io.to(data.room).emit("user_list", users)
+      console.log(users)
       
     }
     else {
-      selectedChamp = rooms.get(data).champion;
+      selectedChamp = rooms.get(data.room).champion;
       console.log(champions[selectedChamp].name)
-      io.to(data).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
-      joinRoom(socket.id, rooms.get(data));
+      io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
+      joinRoom(socket.id, rooms.get(data.room));
+      const users = rooms.get(data.room).sockets.map((user) => ({name: user.name}))
+      io.to(data.room).emit("user_list", users)
     }
     
     //console.log([...rooms.entries()]);
     
-    console.log(`User ${socket.id} has joined room ${data}`)
+    console.log(`User ${socket.id} username ${data.user} has joined room ${data.room}`)
   });
 
 
