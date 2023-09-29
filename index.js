@@ -16,28 +16,7 @@ app.use(cors());
 const server = http.createServer(app);
 
 
-// var newChamps = [];
-// console.log(champions.length);
-// for (var i = 0; i < champions.length; i++) {
-//   console.log(`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[i].url}_0.jpg`)
-//   // console.log(champions[i].url);
-// }
-
-
-// console.log(util.inspect(newChamps, { maxArrayLength: null}))
-
 var rooms = new Map();
-
-// user = {
-//   id : "socketid",
-//   score: 
-// }
-
-// room = {
-//   id: "blah",
-//   users: [socketids],
-
-// }
 
 function joinRoom(socket, name, room) {
   const user = {
@@ -86,7 +65,7 @@ io.on("connection", (socket) => {
       selectedChamp = rooms.get(data.room).champion;
       console.log(champions[selectedChamp].name)
       io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
-      joinRoom(socket.id, rooms.get(data.room));
+      joinRoom(socket.id, data.user, rooms.get(data.room));
       const users = rooms.get(data.room).sockets.map((user) => ({name: user.name}))
       io.to(data.room).emit("user_list", users)
     }
