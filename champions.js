@@ -132,7 +132,7 @@ const champions = [
     { name: 'Varus', url: 'Varus' },
     { name: 'Vayne', url: 'Vayne' },
     { name: 'Veigar', url: 'Veigar' },
-    { name: "Vel'Koz", url: "VelKoz" },
+    { name: "Vel'Koz", url: "Velkoz" },
     { name: 'Vi', url: 'Vi' },
     { name: 'Viktor', url: 'Viktor' },
     { name: 'Vladimir', url: 'Vladimir' },

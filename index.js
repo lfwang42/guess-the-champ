@@ -59,29 +59,29 @@ io.on("connection", (socket) => {
 
   socket.on("join_room", (data) => {
     var selectedChamp = 0;
-
+    socket.join(data);
     if (!rooms.has(data)) {
       selectedChamp = Math.floor(Math.random() * champions.length);
       console.log(champions[selectedChamp].name)
-      socket.to(data).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
+      io.to(data).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
       const room = {
         id: uuidv4(),
         name: data,
         sockets: [],
         champion: selectedChamp
       };
-      joinRoom(socket.id, room);
       rooms.set(data, room);
+      joinRoom(socket.id, room);
+      
     }
     else {
-      selectedChamp = rooms[data].champion;
+      selectedChamp = rooms.get(data).champion;
       console.log(champions[selectedChamp].name)
-      socket.to(data).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
-      joinRoom(socket.id, rooms[data]);
-
+      io.to(data).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
+      joinRoom(socket.id, rooms.get(data));
     }
-    socket.join(data);
-    console.log([...rooms.entries()]);
+    
+    //console.log([...rooms.entries()]);
     
     console.log(`User ${socket.id} has joined room ${data}`)
   });
