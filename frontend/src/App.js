@@ -8,6 +8,7 @@ import src from "./img1.png"
 import React from 'react'
 import { Typography, Button, Card } from '@material-ui/core';
 import ButtonAppBar from "./components/Navbar";
+import Scoreboard from "./components/Scoreboard"
 
 const socket = io.connect("http://localhost:3001");
 
@@ -90,6 +91,7 @@ function App() {
 
         <div className="scoreboard">
           ScoreBoard
+          <div className='scoreboard-card'><Scoreboard/></div>
         </div>
 
         <div className='canvas'>
