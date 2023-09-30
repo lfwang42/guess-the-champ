@@ -63,6 +63,8 @@ function App() {
   // Messages States
   const [name, setName] = useState("");
 
+  const [userNames, setUserNames] = useState([]);
+
   const [randChamp, setRandChamp] = useState("");
 
   const joinRoom = () => {
@@ -84,7 +86,16 @@ function App() {
     })
   }, [])
 
+  React.useEffect(() => {
+    socket.on("user_list", (names) => {
+      setUserNames(names)
+    })
+  }, [])
+
   console.log(randChamp)
+  console.log(userNames)
+
+  const allNames = userNames.map((n) => <li>{n.name}</li>)
 
   return (
     <div>
@@ -94,7 +105,8 @@ function App() {
 
         <div className="scoreboard">
           ScoreBoard
-          <div className='scoreboard-card'><Scoreboard/></div>
+          <ul>{allNames}</ul>
+          {/* <div className='scoreboard-card'><Scoreboard/></div> */}
         </div>
 
         <div className='canvas'>

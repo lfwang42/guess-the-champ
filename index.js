@@ -68,6 +68,7 @@ io.on("connection", (socket) => {
       joinRoom(socket.id, data.user, rooms.get(data.room));
       const users = rooms.get(data.room).sockets.map((user) => ({name: user.name}))
       io.to(data.room).emit("user_list", users)
+      console.log(users)
     }
     
     //console.log([...rooms.entries()]);
