@@ -6,7 +6,7 @@ import { useTimer } from 'react-timer-hook';
 import { ImagePixelated } from "react-pixelate"
 import src from "./img1.png"
 import React from 'react'
-import { Typography, Button, Card } from '@material-ui/core';
+import { Typography, Button, Card } from '@mui/material';
 import ButtonAppBar from "./components/Navbar";
 import Scoreboard from "./components/Scoreboard"
 
@@ -88,14 +88,12 @@ function App() {
 
   React.useEffect(() => {
     socket.on("user_list", (names) => {
+      console.log(names)
       setUserNames(names)
     })
   }, [])
 
-  console.log(randChamp)
-  console.log(userNames)
-
-  const allNames = userNames.map((n) => <li>{n.name}</li>)
+  const allNames = userNames.map((n) => <li>{n.name} {n.score}</li>)
 
   return (
     <div>
