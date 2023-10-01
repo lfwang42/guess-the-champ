@@ -6,8 +6,9 @@ import { useTimer } from 'react-timer-hook';
 import { ImagePixelated } from "react-pixelate"
 import src from "./img1.png"
 import React from 'react'
-import { Typography, Button, Card } from '@material-ui/core';
+import { Typography, Button, Card } from '@mui/material';
 import ButtonAppBar from "./components/Navbar";
+import Scoreboard from "./components/Scoreboard"
 
 const socket = io.connect("http://localhost:3001");
 
@@ -62,6 +63,8 @@ function App() {
   // Messages States
   const [name, setName] = useState("");
 
+  const [userNames, setUserNames] = useState([]);
+
   const [randChamp, setRandChamp] = useState("");
 
   const joinRoom = () => {
@@ -83,7 +86,14 @@ function App() {
     })
   }, [])
 
-  console.log(randChamp)
+  React.useEffect(() => {
+    socket.on("user_list", (names) => {
+      console.log(names)
+      setUserNames(names)
+    })
+  }, [])
+
+  const allNames = userNames.map((n) => <li>{n.name} {n.score}</li>)
 
   return (
     <div>
@@ -93,6 +103,8 @@ function App() {
 
         <div className="scoreboard">
           ScoreBoard
+          <ul>{allNames}</ul>
+          {/* <div className='scoreboard-card'><Scoreboard/></div> */}
         </div>
 
         <div className='canvas'>

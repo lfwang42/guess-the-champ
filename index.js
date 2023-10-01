@@ -65,8 +65,11 @@ io.on("connection", (socket) => {
       io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
       joinRoom(socket.id, data.user, rooms.get(data.room));
     }
-    
+
+  
     const users = rooms.get(data.room).users.map((user) => ({name: user.name, score: user.score}))
+    //console.log([...rooms.entries()]);
+    io.to(data.room).emit("user_list", users)
     console.log(`User ${socket.id} username ${data.user} has joined room ${data.room}`)
     console.log(users)
     io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
