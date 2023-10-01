@@ -31,12 +31,6 @@
       "react-app/jest"
     ]
   },
-  "overrides": {
-    "react-pixelate": {
-      "react": "^18.2.0",
-      "react-dom": "^18.2.0"
-    }
-  },
   "browserslist": {
     "production": [
       ">0.2%",
