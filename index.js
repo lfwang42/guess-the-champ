@@ -68,7 +68,6 @@ io.on("connection", (socket) => {
 
   
     const users = rooms.get(data.room).users.map((user) => ({name: user.name, score: user.score}))
-    //console.log([...rooms.entries()]);
     io.to(data.room).emit("user_list", users)
     console.log(`User ${socket.id} username ${data.user} has joined room ${data.room}`)
     console.log(users)
