@@ -53,7 +53,8 @@ io.on("connection", (socket) => {
         id: uuidv4(),
         name: data.room,
         users: [],
-        champion: selectedChamp
+        champion: selectedChamp,
+        timer: undefined
       };
       rooms.set(data.room, room);
       joinRoom(socket.id, data.user, room);
@@ -81,12 +82,26 @@ io.on("connection", (socket) => {
     console.log(champions[rooms.get(data.room).champion].name.toString().toLowerCase());
     console.log(`Message: ${data.message.toString().toLowerCase()}`)
     if (data.message.toString().toLowerCase() == champions[rooms.get(data.room).champion].name.toString().toLowerCase()) {
-      io.to(data.room).emit("receive_message", `${data.author} guessed the answer!`);
+      io.to(data.room).emit("system_message", `${data.author} guessed the answer!`);
       console.log("correct answer");
     }
     else {
-      socket.to(data.room).emit("receive_message", data);
+      socket.to(data.room).emit("chat_message", data);
     }
+  });
+
+  function unpixelate(room) {
+    io.to(room).emit("depixel");
+  }
+
+  socket.on("start_game", (room) => {
+    if (typeof rooms.get(room).timer !== 'undefined') {
+      clearInterval(rooms.get(room).timer);
+    }
+
+    //call the function "unpixelate" every 10 seconds which just emits to the room 
+    rooms.get(room).timer = setInterval(unpixelate, 10000);
+    io.to(room).emit("start_game");
   });
 
 });
