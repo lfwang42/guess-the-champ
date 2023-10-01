@@ -70,8 +70,6 @@ io.on("connection", (socket) => {
     const users = rooms.get(data.room).users.map((user) => ({name: user.name, score: user.score}))
     //console.log([...rooms.entries()]);
     io.to(data.room).emit("user_list", users)
-    console.log(users)
-    
     console.log(`User ${socket.id} username ${data.user} has joined room ${data.room}`)
     console.log(users)
     io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
@@ -81,9 +79,11 @@ io.on("connection", (socket) => {
 
   socket.on("send_message", (data) => {
     // console.log(data);
-    if (data.message.toString().toLowerCase() == answer) {
-      socket.to(data.room).emit("receive_message", "Player guessed the answer!");
-      console.log("answer");
+    console.log(champions[rooms.get(data.room).champion].name.toString().toLowerCase());
+    console.log(`Message: ${data.message.toString().toLowerCase()}`)
+    if (data.message.toString().toLowerCase() == champions[rooms.get(data.room).champion].name.toString().toLowerCase()) {
+      io.to(data.room).emit("receive_message", `${data.author} guessed the answer!`);
+      console.log("correct answer");
     }
     else {
       socket.to(data.room).emit("receive_message", data);
