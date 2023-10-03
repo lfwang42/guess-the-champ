@@ -54,7 +54,9 @@ io.on("connection", (socket) => {
         name: data.room,
         users: [],
         champion: selectedChamp,
-        timer: undefined
+        timer: undefined,
+        round_start: undefined,
+        round: 0,
       };
       rooms.set(data.room, room);
       joinRoom(socket.id, data.user, room);
@@ -94,17 +96,34 @@ io.on("connection", (socket) => {
     io.to(room).emit("depixel");
   }
 
+  function sendScores(room) { 
+    //emit users and their scores
+    io.to(room).emit("scores", rooms.get(data.room).users.map((user) => ({name: user.name, score: user.score})))
+  }
+
+  //takes in room not room #
+  function resetGame(room) {
+    for (let user in room.users) {
+      user.score = 0;
+    }
+    room.round = 0;
+  }
+
   socket.on("start_game", (room) => {
     if (typeof rooms.get(room).timer !== 'undefined') {
-      clearInterval(rooms.get(room).timer);
+      clearTimeout(rooms.get(room).timer);
     }
-
-    //call the function "unpixelate" every 10 seconds which just emits to the room 
-    rooms.get(room).timer = setInterval(unpixelate, 10000);
+    resetGame(rooms.get(room));
+    rooms.get(room).round_start = new Date();
+    rooms.get(room).timer = setTimeout(sendScores, 60000, room);
+    rooms.get(room).round = 1;
     io.to(room).emit("start_game");
+
   });
 
 });
+
+
 
 server.listen(3001, () => {
   console.log("SERVER IS RUNNING");
