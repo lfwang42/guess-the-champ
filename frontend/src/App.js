@@ -37,7 +37,6 @@ function App() {
       }
     } });
 
-
     return (
       <div style={{textAlign: 'center'}}>
         <div style={{fontSize: '100px'}}>
@@ -67,14 +66,24 @@ function App() {
 
   const [randChamp, setRandChamp] = useState("");
 
+  const [start, setStart] = useState(false);
+
   const joinRoom = () => {
-    if (room !== "" && name != "") {
+    if (room !== "" && name !== "") {
       const roomData = {
         room: room,
         user: name
       };
       socket.emit("join_room", roomData);
     }
+  };
+
+  const startGame = () => {
+    const startData = {
+      room: room,
+      user: name
+    };
+    socket.emit("start_pressed", startData);
   };
 
   const time = new Date();
@@ -93,12 +102,18 @@ function App() {
     })
   }, [])
 
+  React.useEffect(() => {
+    socket.on("start_game", (x) => {
+      console.log(x)
+      setStart(true)
+    })
+  }, [])
+
   const allNames = userNames.map((n) => <li>{n.name} {n.score}</li>)
 
   return (
     <div>
       <ButtonAppBar />
-
       <div className="score-canvas-chat">
 
         <div className="scoreboard">
@@ -107,11 +122,17 @@ function App() {
           {/* <div className='scoreboard-card'><Scoreboard/></div> */}
         </div>
 
-        <div className='canvas'>
-          <MyTimer expiryTimestamp={time} />
-          <div className='image-champ'><ImagePixelated  src={randChamp} width={810} height={478} fillTransparencyColor={"grey"} pixelSize={pixels}/></div>
-          
-        </div>
+        {start ? 
+          <div className='canvas'>
+            <MyTimer expiryTimestamp={time} />
+            <div className='image-champ'>
+              <ImagePixelated  src={randChamp} width={810} height={478} fillTransparencyColor={"grey"} pixelSize={pixels}/>
+            </div>
+          </div>
+          :
+          <Button color="secondary" variant='contained' onClick={startGame}>START</Button>
+        }
+
 
         <div className="info-chat">
 
@@ -138,7 +159,9 @@ function App() {
           <div className="chat">
             <div>
               CHATBOX
-              <Chat socket={socket} name={name} room={room}/>
+              <div className="whole-chat">
+                <Chat socket={socket} name={name} room={room}/>
+              </div>
             </div>
           </div>
 

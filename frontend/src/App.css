@@ -95,11 +95,49 @@ input {
   row-gap: 2em;
 }
 
-.chat-body{
+/* .chat-body{
   background-color: rgb(144, 211, 189);
-}
+} */
 
 .message-send {
   justify-content: center;
   align-items: center;
+}
+
+/* .chat-and-send {
+  display: flex;
+  flex-direction: column;
+  justify-content:flex-end
+} */
+
+
+.chat-and-send {
+  display: flex;
+  flex-direction: column;
+  height: 650px; /* Set a fixed height for the chatbox container */
+  border: 3px solid #ccc;
+  overflow: hidden; /* Hide overflow content */
+  
+}
+
+.chat-body {
+  flex: 1;
+  overflow-y: auto; /* Enable vertical scrolling for the chat-body */
+  padding: 10px;
+}
+
+.message-content {
+  margin-bottom: 10px;
+}
+
+.send-message {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: #f2f2f2;
+}
+
+.whole-chat {
+  padding: 20px;
 }
