@@ -98,7 +98,7 @@ io.on("connection", (socket) => {
 
   function sendScores(room) { 
     //emit users and their scores
-    io.to(room).emit("scores", rooms.get(data.room).users.map((user) => ({name: user.name, score: user.score})))
+    // io.to(room).emit("scores", rooms.get(data.room).users.map((user) => ({name: user.name, score: user.score})))
   }
 
   //takes in room not room #
@@ -109,10 +109,13 @@ io.on("connection", (socket) => {
     room.round = 0;
   }
 
-  socket.on("start_game", (room) => {
-    if (typeof rooms.get(room).timer !== 'undefined') {
+  socket.on("start_pressed", (data) => {
+    var room = data.room;
+    console.log(room);
+    if (rooms.get(room).timer !== undefined) {
       clearTimeout(rooms.get(room).timer);
     }
+    
     resetGame(rooms.get(room));
     rooms.get(room).round_start = new Date();
     rooms.get(room).timer = setTimeout(sendScores, 60000, room);
