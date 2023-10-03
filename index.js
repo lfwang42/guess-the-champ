@@ -20,7 +20,7 @@ var rooms = new Map();
 
 function joinRoom(socket, name, room) {
   const user = {
-    socketId: socket,
+    socketId: socket.toString(),
     name: name,
     score: 0
   }
@@ -74,17 +74,29 @@ io.on("connection", (socket) => {
     io.to(data.room).emit("user_list", users)
     console.log(`User ${socket.id} username ${data.user} has joined room ${data.room}`)
     console.log(users)
+    console.log(rooms.get(data.room).users);
     io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
 
   });
 
 
   socket.on("send_message", (data) => {
+    console.log(`Message received from ${socket.id}`);
     // console.log(data);
     //console.log(champions[rooms.get(data.room).champion].name.toString().toLowerCase());
     console.log(`Message: ${data.message.toString().toLowerCase()}`)
-    if (data.message.toString().toLowerCase() == champions[rooms.get(data.room).champion].name.toString().toLowerCase()) {
-      io.to(data.room).emit("system_message", `${data.author} guessed the answer!`);
+    if (rooms.get(data.room).round_start !== undefined && data.message.toString().toLowerCase() == champions[rooms.get(data.room).champion].name.toString().toLowerCase()) {
+      const date = new Date();
+      var diff = Math.abs(date - rooms.get(data.room).round_start);
+      for (let i = 0; i < rooms.get(data.room).users.length; i++) {
+        const currentId = rooms.get(data.room).users[i].socketId;
+        console.log(`message from ${socket.id}, current user socket id ${currentId}`);
+        if (currentId == socket.id.toString()) {
+          rooms.get(data.room).users[i].score += parseInt((60000 - diff) / 60);
+          console.log(`User ${rooms.get(data.room).users[i].name} has ${rooms.get(data.room).users[i].score} points.`);
+        }
+      }
+      io.to(data.room).emit("system_message", `${data.author} guessed the answer!.`);
       console.log("correct answer");
     }
     else {
@@ -98,6 +110,8 @@ io.on("connection", (socket) => {
 
   function sendScores(room) { 
     //emit users and their scores
+    console.log("yo")
+    console.log(room)
     // io.to(room).emit("scores", rooms.get(data.room).users.map((user) => ({name: user.name, score: user.score})))
   }
 
@@ -118,7 +132,7 @@ io.on("connection", (socket) => {
     
     resetGame(rooms.get(room));
     rooms.get(room).round_start = new Date();
-    rooms.get(room).timer = setTimeout(sendScores, 60000, room);
+    rooms.get(room).timer = setTimeout(sendScores, 10000, room);
     rooms.get(room).round = 1;
     io.to(room).emit("start_game");
 
