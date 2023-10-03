@@ -78,7 +78,7 @@ io.on("connection", (socket) => {
 
   socket.on("send_message", (data) => {
     // console.log(data);
-    console.log(champions[rooms.get(data.room).champion].name.toString().toLowerCase());
+    //console.log(champions[rooms.get(data.room).champion].name.toString().toLowerCase());
     console.log(`Message: ${data.message.toString().toLowerCase()}`)
     if (data.message.toString().toLowerCase() == champions[rooms.get(data.room).champion].name.toString().toLowerCase()) {
       io.to(data.room).emit("receive_message", `${data.author} guessed the answer!`);
