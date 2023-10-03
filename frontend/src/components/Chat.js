@@ -21,23 +21,21 @@ export default function Chat({ socket, name, room }) {
 
   React.useEffect(() => {
     socket.on('receive_message', (data) => {
+      //setMessageList((list) => [...list, data.author + ": " + data.message])
       setMessageList((list) => [...list, data]);
       chatBodyRef.current.scrollBottom = chatBodyRef.current.scrollHeight; // Scroll to the bottom when a new message arrives
     });
   }, [socket]);
+
+  console.log(messageList)
 
   return (
     <div className='chat-and-send'>
       <div className='chat-body' ref={chatBodyRef}>
         {messageList.map((m, index) => (
           <div key={index} className='message-content'>
-            <div>
-              <div className='message-body'>
-                <h3>{m.message}</h3>
-              </div>
-              <div className='metadata'>
-                <p>{m.author}</p>
-              </div>
+            <div className='metadata'>
+              <p className='each-message'>{m.author} : {m.message}</p>
             </div>
           </div>
         ))}

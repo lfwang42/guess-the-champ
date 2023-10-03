@@ -137,24 +137,30 @@ function App() {
         <div className="info-chat">
 
           <div className="info">
-            <input
-              className="room-num"
-              type="text"
-              placeholder="Room Number..."
-              onChange={(event) => {
-                setRoom(event.target.value);
-              }}
-            />
-            <input
-              className="username"
-              type="text"
-              placeholder="Name"
-              onChange={(event) => {
-                setName(event.target.value);
-              }}
-            />
-            <button className="join-button" onClick={joinRoom}> Join Room</button>
-          </div>
+            <div className="input-row">
+              <input
+                className="room-num"
+                type="text"
+                placeholder="Room Number..."
+                onChange={(event) => {
+                  setRoom(event.target.value);
+                }}
+              />
+              <input
+                className="username"
+                type="text"
+                placeholder="Name"
+                onChange={(event) => {
+                  setName(event.target.value);
+                }}
+              />
+            </div>
+              <div className="button-row">
+                <Button className="join-button" color="secondary" variant="contained" onClick={joinRoom}>
+                  Join Room
+                </Button>
+              </div>
+            </div>
 
           <div className="chat">
             <div>
