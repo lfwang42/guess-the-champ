@@ -15,17 +15,19 @@ app.use(cors());
 
 const server = http.createServer(app);
 
+class UserInfo {
+  constructor(name) {
+    this.name = name;
+    this.score = 0;
+    this.guessed = false;
+  }
+}
 
 var rooms = new Map();
 
-function joinRoom(socket, name, room) {
-  const user = {
-    socketId: socket.toString(),
-    name: name,
-    score: 0,
-    guessed: false,
-  }
-  room.users.push(user);
+function joinRoom(socketId, name, room) {
+  const user_info = new UserInfo(name);
+  room.users.set(socketId, user_info);
   console.log(room.users);
 }
 
@@ -42,6 +44,25 @@ console.log(uuidv4());
 io.on("connection", (socket) => {
   console.log(`User Connected: ${socket.id}`);
 
+
+  socket.on("disconnecting", () => {
+    const left_rooms = socket.rooms;
+    //remove user from all game rooms they are in.
+    for (let value of left_rooms) {
+      if (rooms.has(value) && rooms.get(value).users.has(socket.id)) {
+        rooms.get(value).users.delete(socket.id);
+        //check if next round should start (i.e. if user was last one who had not guessed) and start if it should
+        check_round_end(rooms.get(value));
+        console.log(`User ${socket.id} leaving room ${value}`);
+      }
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`User Disconnected: ${socket.id}`);
+  });
+
+
   socket.on("join_room", (data) => {
     var selectedChamp = 0;
     socket.join(data.room);
@@ -53,7 +74,7 @@ io.on("connection", (socket) => {
       const room = {
         id: uuidv4(),
         name: data.room,
-        users: [],
+        users: new Map(),
         champion: selectedChamp,
         timer: undefined,
         round_start: undefined,
@@ -72,10 +93,9 @@ io.on("connection", (socket) => {
     }
 
   
-    const users = rooms.get(data.room).users.map((user) => ({name: user.name, score: user.score}))
+    const users = Array.from(rooms.get(data.room).users.values()).map((user) => ({name: user.name, score: user.score}))
     io.to(data.room).emit("user_list", users)
     console.log(`User ${socket.id} username ${data.user} has joined room ${data.room}`)
-    console.log(users)
     console.log(rooms.get(data.room).users);
     io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
 
@@ -109,30 +129,45 @@ io.on("connection", (socket) => {
   }
 
   function handle_guess(room) {
-    
-    for (let i = 0; i < room.users.length; i++) {
-      const currentId = room.users[i].socketId;
-      console.log(`message from ${socket.id}, current user socket id ${currentId}`);
-      if (currentId == socket.id.toString()) {
-        if (room.users[i].guessed == false) {
-          const date = new Date();
-          var diff = Math.abs(date - room.round_start);
-          room.users[i].score += parseInt((60000 - diff) / 60);
-          console.log(`User ${room.users[i].name} has ${room.users[i].score} points.`);
-          //update # of ppl who have guessed correctly
-          room.answered += 1
-          check_round_end(room);
-          return true;
-        }
-        else {
-          console.log(`User ${room.users[i].name} has already guessed correctly this round.`);
-          return false;
-        }
-      }
-      
+    if (room.users.get(socket.id).guessed == false) {
+      const date = new Date();
+      var diff = Math.abs(date - room.round_start);
+      room.users.get(socket.id).score += parseInt((60000 - diff) / 60);
+      room.users.get(socket.id).guessed = true;
+      console.log(`User ${room.users.get(socket.id).name} has ${room.users.get(socket.id).score} points.`);
+      //update # of ppl who have guessed correctly
+      room.answered += 1
+      check_round_end(room);
+      return true;
     }
-    return false;
+    else {
+      console.log(`User ${room.users.get(socket.id).name} has already guessed correctly this round.`);
+      return false;
+    }
   }
+
+
+    // for (let i = 0; i < room.users.length; i++) {
+    //   const currentId = room.users[i].socketId;
+    //   console.log(`message from ${socket.id}, current user socket id ${currentId}`);
+    //   if (currentId == socket.id.toString()) {
+    //     if (room.users[i].guessed == false) {
+    //       const date = new Date();
+    //       var diff = Math.abs(date - room.round_start);
+    //       room.users[i].score += parseInt((60000 - diff) / 60);
+    //       console.log(`User ${room.users[i].name} has ${room.users[i].score} points.`);
+    //       //update # of ppl who have guessed correctly
+    //       room.answered += 1
+    //       check_round_end(room);
+    //       return true;
+    //     }
+    //     else {
+    //       console.log(`User ${room.users[i].name} has already guessed correctly this round.`);
+    //       return false;
+    //     }
+    //   }
+      
+    // }
 
   function check_round_end(room) {
     if (room.answered == room.users.length) {
@@ -143,8 +178,10 @@ io.on("connection", (socket) => {
 
   //assumes caller already checked that next round should advance
   function next_round(room) {
+    // console.log(`next_round room: ${room}`)
     room.champion = Math.floor(Math.random() * champions.length);
-    console.log(champions[room.champion].name)
+    // console.log(room.champion);
+    // console.log(champions[room.champion].name)
     room.round_start = new Date();
     clearTimeout(room.timer);
     sendScores(room);
@@ -163,8 +200,9 @@ io.on("connection", (socket) => {
 
   //takes in room not room #
   function resetGame(room) {
-    for (let user in room.users) {
+    for (let user in room.users.values()) {
       user.score = 0;
+      user.guessed = false;
     }
     room.round = 0;
     room.answered = 0;
@@ -181,7 +219,7 @@ io.on("connection", (socket) => {
     
     resetGame(rooms.get(room));
     rooms.get(room).round_start = new Date();
-    rooms.get(room).timer = setTimeout(next_round, 10000, room);
+    rooms.get(room).timer = setTimeout(next_round, 10000, rooms.get(room));
     rooms.get(room).round = 1;
     io.to(room).emit("start_game");
   });
