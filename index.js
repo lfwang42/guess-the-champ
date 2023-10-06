@@ -1,10 +1,7 @@
-// import champions from "./champions.js"
-// const champions = require("lol-champions");
 const {v4: uuidv4 } = require("uuid");
 const util = require("util");
 const data = require("./champions.js");
 const champions = data.champions
-// console.log(champions)
 const express = require("express");
 const app = express();
 const http = require("http");
@@ -195,7 +192,8 @@ io.on("connection", (socket) => {
     //emit users and their scores
     // console.log("yo")
     // console.log(room)
-    // io.to(room).emit("scores", rooms.get(data.room).users.map((user) => ({name: user.name, score: user.score})))
+    const users = Array.from(room.users.values()).map((user) => ({name: user.name, score: user.score}))
+    io.to(room).emit("scores", users)
   }
 
   //takes in room not room #
@@ -208,6 +206,7 @@ io.on("connection", (socket) => {
     room.answered = 0;
     room.timer = undefined;
     room.round_start = undefined;
+    sendScores(room);
   }
 
   socket.on("start_pressed", (data) => {
@@ -227,46 +226,6 @@ io.on("connection", (socket) => {
 });
 
 
-
 server.listen(3001, () => {
   console.log("SERVER IS RUNNING");
 });
-
-
-/*
-const express = require('express');
-const app = express();
-const http = require('http');
-const server = http.createServer(app);
-const { Server } = require("socket.io");
-const io = new Server(server, {
-  cors: {
-    origin: 'http://localhost:3000/'
-  },
-});
-const cors = require('cors')
-
-app.use(cors());
-
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
-});
-
-io.on('connection', (socket) => {
-  console.log('a user connected');
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
-  });
-  socket.on('chat message', (user, msg) => {
-    console.log('message: ' + user + ": " + msg);
-    socket.broadcast.emit('chat message', user, msg);
-  });
-  socket.on('username change', (oldUser, user) => {
-    console.log('user ' + oldUser + " changed name to " + user);
-  });
-});
-
-server.listen(3001, () => {
-  console.log('listening on *:3001');
-});
-*/
