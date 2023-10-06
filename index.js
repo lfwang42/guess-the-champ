@@ -7,11 +7,11 @@ const app = express();
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
-const answer = "jhin";
 app.use(cors());
 
 const server = http.createServer(app);
 
+//users are stored in hashmaps of socket.id => UserInfo
 class UserInfo {
   constructor(name) {
     this.name = name;
@@ -143,29 +143,6 @@ io.on("connection", (socket) => {
     }
   }
 
-
-    // for (let i = 0; i < room.users.length; i++) {
-    //   const currentId = room.users[i].socketId;
-    //   console.log(`message from ${socket.id}, current user socket id ${currentId}`);
-    //   if (currentId == socket.id.toString()) {
-    //     if (room.users[i].guessed == false) {
-    //       const date = new Date();
-    //       var diff = Math.abs(date - room.round_start);
-    //       room.users[i].score += parseInt((60000 - diff) / 60);
-    //       console.log(`User ${room.users[i].name} has ${room.users[i].score} points.`);
-    //       //update # of ppl who have guessed correctly
-    //       room.answered += 1
-    //       check_round_end(room);
-    //       return true;
-    //     }
-    //     else {
-    //       console.log(`User ${room.users[i].name} has already guessed correctly this round.`);
-    //       return false;
-    //     }
-    //   }
-      
-    // }
-
   function check_round_end(room) {
     if (room.answered == room.users.length) {
       console.log('all users guessed (check_round_end)');
@@ -190,13 +167,11 @@ io.on("connection", (socket) => {
 
   function sendScores(room) { 
     //emit users and their scores
-    // console.log("yo")
-    // console.log(room)
     const users = Array.from(room.users.values()).map((user) => ({name: user.name, score: user.score}))
     io.to(room).emit("scores", users)
   }
 
-  //takes in room not room #
+  //takes in room 
   function resetGame(room) {
     for (let user in room.users.values()) {
       user.score = 0;
