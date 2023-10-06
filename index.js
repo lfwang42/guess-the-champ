@@ -93,7 +93,7 @@ io.on("connection", (socket) => {
     const users = Array.from(rooms.get(data.room).users.values()).map((user) => ({name: user.name, score: user.score}))
     io.to(data.room).emit("user_list", users)
     console.log(`User ${socket.id} username ${data.user} has joined room ${data.room}`)
-    console.log(rooms.get(data.room).users);
+    //console.log(rooms.get(data.room).users);
     io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
 
   });
@@ -211,7 +211,6 @@ io.on("connection", (socket) => {
 
   socket.on("start_pressed", (data) => {
     var room = data.room;
-    console.log(room);
     if (rooms.get(room).timer !== undefined) {
       clearTimeout(rooms.get(room).timer);
     }
