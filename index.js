@@ -100,7 +100,7 @@ io.on("connection", (socket) => {
       }
     }
     else {
-      socket.to(data.room).emit("receive_message", data);
+      socket.to(data.room).emit("chat_message", data);
     }
   });
 
