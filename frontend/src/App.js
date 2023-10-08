@@ -79,11 +79,13 @@ function App() {
   };
 
   const startGame = () => {
-    const startData = {
-      room: room,
-      user: name
-    };
-    socket.emit("start_pressed", startData);
+    if (room !== "" && name !== "") {
+      const startData = {
+        room: room,
+        user: name
+      };
+      socket.emit("start_pressed", startData);
+    }
   };
 
   const time = new Date();
