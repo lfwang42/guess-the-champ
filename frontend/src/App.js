@@ -9,6 +9,8 @@ import React from 'react'
 import { Typography, Button, Card } from '@mui/material';
 import ButtonAppBar from "./components/Navbar";
 import Scoreboard from "./components/Scoreboard"
+import Modal from "./components/Modal";
+
 
 const socket = io.connect("http://localhost:3001");
 
@@ -111,10 +113,19 @@ function App() {
     })
   }, [])
 
+  function handleStateRoom(newValue) {
+    setRoom(newValue)
+  }
+
+  function handleStateName(newValue) {
+    setName(newValue)
+  }
+
   const allNames = userNames.map((n) => <li>{n.name} {n.score}</li>)
 
   return (
     <div>
+      <Modal joinRoom={joinRoom} startBtn={startGame} changeRoom = {handleStateRoom} changeName = {handleStateName}/>
       <ButtonAppBar />
       <div className="score-canvas-chat">
 
@@ -132,7 +143,7 @@ function App() {
             </div>
           </div>
           :
-          <Button color="secondary" variant='contained' onClick={startGame}>START</Button>
+          <div></div>
         }
 
 
@@ -162,7 +173,7 @@ function App() {
                   Join Room
                 </Button>
               </div>
-            </div>
+          </div>
 
           <div className="chat">
             <div>
