@@ -89,7 +89,13 @@ io.on("connection", (socket) => {
     console.log(`Message: ${data.message.toString().toLowerCase()}`)
     if (rooms.get(data.room).round_start !== undefined && data.message.toString().toLowerCase() == champions[rooms.get(data.room).champion].name.toString().toLowerCase()) {
       if (handle_guess(rooms.get(data.room))) {
-        io.to(data.room).emit("system_message", `${data.author} guessed the answer!.`);
+        const message = {
+          room: data.room,
+          author: "system",
+          message: `${data.author} guessed the answer!.`,
+          type: 'system',
+        };
+        io.to(data.room).emit("chat_message", message);
         console.log("correct answer");
       }
     }
