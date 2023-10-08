@@ -48,14 +48,27 @@ body {
 }
 
 .info {
-  background-color: lightblue;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.input-row {
   display: flex;
   flex-direction: row;
-  justify-content: space-evenly;
-  align-items: center;
-  gap: 0.5em;
-  flex-wrap: wrap;
+  margin-bottom: 10px; /* Add margin between input fields and button */
 }
+
+.room-num,
+.username {
+  margin-right: 10px; /* Add margin between input fields */
+}
+
+.button-row {
+  display: flex;
+  justify-content: center;
+}
+
 
 button {
   height: 30px;
@@ -121,13 +134,15 @@ input {
 }
 
 .chat-body {
+  background: aliceblue;
   flex: 1;
   overflow-y: auto; /* Enable vertical scrolling for the chat-body */
   padding: 10px;
 }
 
 .message-content {
-  margin-bottom: 10px;
+  border: 2px solid rgb(226, 221, 221);
+  background-color: #c2b6b9;
 }
 
 .send-message {
@@ -140,4 +155,10 @@ input {
 
 .whole-chat {
   padding: 20px;
+}
+
+.each-message {
+  margin: 0px;
+  padding: 5px;
+  font-weight: 500;
 }

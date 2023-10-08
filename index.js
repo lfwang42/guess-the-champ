@@ -92,7 +92,6 @@ io.on("connection", (socket) => {
         io.to(data.room).emit("system_message", `${data.author} guessed the answer!.`);
         console.log("correct answer");
       }
-      
     }
     else {
       socket.to(data.room).emit("receive_message", data);
