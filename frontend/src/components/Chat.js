@@ -20,25 +20,37 @@ export default function Chat({ socket, name, room }) {
   };
 
   React.useEffect(() => {
-    socket.on('receive_message', (data) => {
+    socket.on('chat_message', (data) => {
       //setMessageList((list) => [...list, data.author + ": " + data.message])
       setMessageList((list) => [...list, data]);
       chatBodyRef.current.scrollBottom = chatBodyRef.current.scrollHeight; // Scroll to the bottom when a new message arrives
     });
   }, [socket]);
 
-  console.log(messageList)
+  const mapMessage = messageList.map((m, index) => {
+    if (typeof(m) === "string") {
+      return (
+        <div key={index} className='message-content'>
+          <div className='metadata'>
+            <p className='each-message'>{m}</p>
+          </div>
+        </div>
+      )
+    } else {
+      return (
+        <div key={index} className='message-content'>
+          <div className='metadata'>
+            <p className='each-message'>{m.author} : {m.message}</p>
+          </div>
+        </div>
+      )
+    }
+  })
 
   return (
     <div className='chat-and-send'>
       <div className='chat-body' ref={chatBodyRef}>
-        {messageList.map((m, index) => (
-          <div key={index} className='message-content'>
-            <div className='metadata'>
-              <p className='each-message'>{m.author} : {m.message}</p>
-            </div>
-          </div>
-        ))}
+        {mapMessage}
       </div>
       <div className='send-message'>
         <input
