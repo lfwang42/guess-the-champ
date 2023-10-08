@@ -11,6 +11,7 @@ export default function Chat({ socket, name, room }) {
         room: room,
         author: name,
         message: message,
+        type: 'user'
       };
 
       await socket.emit('chat_message', messageData);
@@ -28,11 +29,11 @@ export default function Chat({ socket, name, room }) {
   }, [socket]);
 
   const mapMessage = messageList.map((m, index) => {
-    if (typeof(m) === "string") {
+    if (m.type === "system") {
       return (
         <div key={index} className='message-content'>
           <div className='metadata'>
-            <p className='each-message'>{m}</p>
+            <p className='each-message'>{m.message}</p>
           </div>
         </div>
       )
