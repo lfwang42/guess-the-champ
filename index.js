@@ -20,9 +20,10 @@ var rooms = new Map();
 
 function joinRoom(socket, name, room) {
   const user = {
-    socketId: socket,
+    socketId: socket.toString(),
     name: name,
-    score: 0
+    score: 0,
+    guessed: false,
   }
   room.users.push(user);
   console.log(room.users);
@@ -57,6 +58,7 @@ io.on("connection", (socket) => {
         timer: undefined,
         round_start: undefined,
         round: 0,
+        answered: 0
       };
       rooms.set(data.room, room);
       joinRoom(socket.id, data.user, room);
@@ -74,21 +76,26 @@ io.on("connection", (socket) => {
     io.to(data.room).emit("user_list", users)
     console.log(`User ${socket.id} username ${data.user} has joined room ${data.room}`)
     console.log(users)
+    console.log(rooms.get(data.room).users);
     io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
 
   });
 
 
-  socket.on("send_message", (data) => {
+  socket.on("chat_message", (data) => {
+    console.log(`Message received from ${socket.id}`);
     // console.log(data);
     //console.log(champions[rooms.get(data.room).champion].name.toString().toLowerCase());
     console.log(`Message: ${data.message.toString().toLowerCase()}`)
-    if (data.message.toString().toLowerCase() == champions[rooms.get(data.room).champion].name.toString().toLowerCase()) {
-      io.to(data.room).emit("system_message", `${data.author} guessed the answer!`);
-      console.log("correct answer");
+    if (rooms.get(data.room).round_start !== undefined && data.message.toString().toLowerCase() == champions[rooms.get(data.room).champion].name.toString().toLowerCase()) {
+      if (handle_guess(rooms.get(data.room))) {
+        io.to(data.room).emit("system_message", `${data.author} guessed the answer!.`);
+        console.log("correct answer");
+      }
+      
     }
     else {
-      socket.to(data.room).emit("chat_message", data);
+      socket.to(data.room).emit("receive_message", data);
     }
   });
 
@@ -96,8 +103,56 @@ io.on("connection", (socket) => {
     io.to(room).emit("depixel");
   }
 
+  function handle_guess(room) {
+    
+    for (let i = 0; i < room.users.length; i++) {
+      const currentId = room.users[i].socketId;
+      console.log(`message from ${socket.id}, current user socket id ${currentId}`);
+      if (currentId == socket.id.toString()) {
+        if (room.users[i].guessed == false) {
+          const date = new Date();
+          var diff = Math.abs(date - room.round_start);
+          room.users[i].score += parseInt((60000 - diff) / 60);
+          console.log(`User ${room.users[i].name} has ${room.users[i].score} points.`);
+          //update # of ppl who have guessed correctly
+          room.answered += 1
+          check_round_end(room);
+          return true;
+        }
+        else {
+          console.log(`User ${room.users[i].name} has already guessed correctly this round.`);
+          return false;
+        }
+      }
+      
+    }
+    return false;
+  }
+
+  function check_round_end(room) {
+    if (room.answered == room.users.length) {
+      console.log('all users guessed (check_round_end)');
+      next_round(room);
+    }
+  }
+
+  //assumes caller already checked that next round should advance
+  function next_round(room) {
+    room.champion = Math.floor(Math.random() * champions.length);
+    console.log(champions[room.champion].name)
+    room.round_start = new Date();
+    clearTimeout(room.timer);
+    sendScores(room);
+    room.timer = setTimeout(next_round, 10000, room);
+    room.round += 1;
+    io.to(room.name).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[room.champion].url}_0.jpg`)
+    console.log(`Round ${room.round} started`);
+  }
+
   function sendScores(room) { 
     //emit users and their scores
+    // console.log("yo")
+    // console.log(room)
     // io.to(room).emit("scores", rooms.get(data.room).users.map((user) => ({name: user.name, score: user.score})))
   }
 
@@ -107,6 +162,9 @@ io.on("connection", (socket) => {
       user.score = 0;
     }
     room.round = 0;
+    room.answered = 0;
+    room.timer = undefined;
+    room.round_start = undefined;
   }
 
   socket.on("start_pressed", (data) => {
@@ -118,10 +176,9 @@ io.on("connection", (socket) => {
     
     resetGame(rooms.get(room));
     rooms.get(room).round_start = new Date();
-    rooms.get(room).timer = setTimeout(sendScores, 60000, room);
+    rooms.get(room).timer = setTimeout(next_round, 10000, room);
     rooms.get(room).round = 1;
     io.to(room).emit("start_game");
-
   });
 
 });

@@ -13,7 +13,7 @@ export default function Chat({ socket, name, room }) {
         message: message,
       };
 
-      await socket.emit('send_message', messageData);
+      await socket.emit('chat_message', messageData);
       setMessageList((list) => [...list, messageData]);
       setMessage(''); // Clear the input field after sending
     }
