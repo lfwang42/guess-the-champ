@@ -159,7 +159,10 @@ io.on("connection", (socket) => {
     room.round_start = new Date();
     clearTimeout(room.timer);
     sendScores(room);
-    room.timer = setTimeout(next_round, 10000, room);
+    [...room.users.keys()].forEach((key) => {
+      room.users.get(key).guessed = false;
+    });
+    room.timer = setTimeout(next_round, 20000, room);
     room.round += 1;
     io.to(room.name).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[room.champion].url}_0.jpg`)
     console.log(`Round ${room.round} started`);
@@ -168,7 +171,8 @@ io.on("connection", (socket) => {
   function sendScores(room) { 
     //emit users and their scores
     const users = Array.from(room.users.values()).map((user) => ({name: user.name, score: user.score}))
-    io.to(room).emit("scores", users)
+    io.to(room.name).emit("scores", users)
+    console.log(users);
   }
 
   //takes in room 
