@@ -193,7 +193,7 @@ io.on("connection", (socket) => {
     // console.log("yo")
     // console.log(room)
     const users = Array.from(room.users.values()).map((user) => ({name: user.name, score: user.score}))
-    io.to(room).emit("scores", users)
+    io.to(room.name).emit("scores", users)
   }
 
   //takes in room not room #

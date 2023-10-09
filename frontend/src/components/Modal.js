@@ -27,7 +27,7 @@ export default function Modal(props) {
 
     return (
         <>
-            {modal && (
+            {modal && !props.start && (
                 <div className="modal">
                     <div className='overlay'></div>
                     <div className='modal-content'>

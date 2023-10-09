@@ -70,6 +70,8 @@ function App() {
 
   const [start, setStart] = useState(false);
 
+  const [modal, setModal] = useState(true);
+
   const joinRoom = () => {
     if (room !== "" && name !== "") {
       const roomData = {
@@ -90,6 +92,12 @@ function App() {
     }
   };
 
+  // React.useEffect(() => {
+  //   socket.on("start_game", () => {
+  //     setModal(false)
+  //   })
+  // }, [])
+
   const time = new Date();
   time.setSeconds(time.getSeconds() + 5);
 
@@ -99,17 +107,23 @@ function App() {
     })
   }, [])
 
-  React.useEffect(() => {
-    socket.on("user_list", (names) => {
-      console.log(names)
-      setUserNames(names)
-    })
-  }, [])
+  // React.useEffect(() => {
+  //   socket.on("user_list", (names) => {
+  //     //console.log(names)
+  //     setUserNames(names)
+  //   })
+  // }, [])
 
   React.useEffect(() => {
     socket.on("start_game", (x) => {
       console.log(x)
       setStart(true)
+    })
+  }, [])
+
+  React.useEffect(() => {
+    socket.on("scores", (x) => {
+      setUserNames(x)
     })
   }, [])
 
@@ -125,7 +139,7 @@ function App() {
 
   return (
     <div>
-      <Modal joinRoom={joinRoom} startBtn={startGame} changeRoom = {handleStateRoom} changeName = {handleStateName}/>
+      <Modal start={start} joinRoom={joinRoom} startBtn={startGame} changeRoom = {handleStateRoom} changeName = {handleStateName}/>
       <ButtonAppBar />
       <div className="score-canvas-chat">
 
