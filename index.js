@@ -182,7 +182,6 @@ io.on("connection", (socket) => {
     //emit users and their scores
     const users = Array.from(room.users.values()).map((user) => ({name: user.name, score: user.score}))
     io.to(room.name).emit("scores", users)
-    console.log(users);
   }
 
   //takes in room 
