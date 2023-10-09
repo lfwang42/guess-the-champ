@@ -76,7 +76,8 @@ io.on("connection", (socket) => {
         timer: undefined,
         round_start: undefined,
         round: 0,
-        answered: 0
+        answered: 0,
+        host: socket.id,
       };
       rooms.set(data.room, room);
       joinRoom(socket.id, data.user, room);
@@ -121,6 +122,15 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("change_host", (data) => {
+    if (socket.id == data.id) {
+      
+    }
+  });
+
+  function change_host(room) {
+
+  }
   function unpixelate(room) {
     io.to(room).emit("depixel");
   }
