@@ -123,8 +123,8 @@ io.on("connection", (socket) => {
   });
 
   socket.on("change_host", (data) => {
-    if (socket.id == data.id) {
-      
+    if (socket.id == data.sender_id) {
+      rooms.get(data.room).host = data.newHost;
     }
   });
 
