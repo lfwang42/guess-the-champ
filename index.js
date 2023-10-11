@@ -10,6 +10,7 @@ const cors = require("cors");
 app.use(cors());
 
 const server = http.createServer(app);
+const max_users = 4;
 
 //users are stored in hashmaps of socket.id => UserInfo
 class UserInfo {
@@ -23,11 +24,94 @@ class UserInfo {
 var rooms = new Map();
 
 function joinRoom(socketId, name, room) {
+
   const user_info = new UserInfo(name);
   room.users.set(socketId, user_info);
   console.log(room.users);
+  console.log(`User ${socketId} username ${name} has joined room ${room.name}`)
 }
 
+function leaveRoom(socketId, room) {
+  console.log(room);
+  if (room.users.has(socketId)) {
+    room.users.delete(socketId);
+    //delete empty rooms.
+    if (room.users.size == 0) {
+      delete_room(room);
+    }
+    else {
+      //assign new host if old one left.
+      if (rooms.host == socketId) {
+        revoke_host(socketId, room);
+        const newHost = room.users.keys().next().value;
+        grant_host(newHost, room);
+      }
+      //check if next round should start (i.e. if user was last one who had not guessed) and start if it should
+      check_round_end(room);
+    }
+    console.log(`User ${socketId} leaving room ${room.name}`);
+  }
+}
+
+function delete_room(room) {
+  clearTimeout(room.timer);
+  rooms.delete(room.name);
+  console.log(`deleted room ${room.name}`);
+}
+
+function check_round_end(room) {
+  if (room.answered == room.users.length) {
+    console.log('all users guessed (check_round_end)');
+    next_round(room);
+  }
+}
+
+//assumes caller already checked that next round should advance
+function next_round(room) {
+  // console.log(`next_round room: ${room}`)
+  room.champion = Math.floor(Math.random() * champions.length);
+  // console.log(room.champion);
+  // console.log(champions[room.champion].name)
+  room.round_start = new Date();
+  clearTimeout(room.timer);
+  sendScores(room);
+  [...room.users.keys()].forEach((key) => {
+    room.users.get(key).guessed = false;
+  });
+  room.timer = setTimeout(next_round, 20000, room);
+  room.round += 1;
+  io.to(room.name).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[room.champion].url}_0.jpg`)
+  console.log(`Round ${room.round} started`);
+}
+
+function sendScores(room) { 
+  //emit users and their scores
+  const users = Array.from(room.users.values()).map((user) => ({name: user.name, score: user.score}))
+  io.to(room.name).emit("scores", users)
+}
+
+function revoke_host(id, room) {
+  if (room.host != undefined) {
+    room.host = undefined;
+    io.to(id).emit("revoke_host");
+    console.log(`${id} revoked host of room ${room.name}`);
+  }
+  else {
+    console.log(`Room${room.name} already has no host.`);
+  }
+}
+
+
+function grant_host(id, room) {
+  if (room.host == undefined) {
+    room.host = id;
+    io.to(id).emit("grant_host");
+    console.log(`${room.host} granted host of room ${room.name}`);
+  }
+  else {
+    console.log(`Room${room.name} already has host ${room.host}`);
+  }
+}
 
 const io = new Server(server, {
   cors: {
@@ -46,11 +130,8 @@ io.on("connection", (socket) => {
     const left_rooms = socket.rooms;
     //remove user from all game rooms they are in.
     for (let value of left_rooms) {
-      if (rooms.has(value) && rooms.get(value).users.has(socket.id)) {
-        rooms.get(value).users.delete(socket.id);
-        //check if next round should start (i.e. if user was last one who had not guessed) and start if it should
-        check_round_end(rooms.get(value));
-        console.log(`User ${socket.id} leaving room ${value}`);
+      if (rooms.has(value)) {
+        leaveRoom(socket.id, rooms.get(value));
       }
     }
   });
@@ -59,11 +140,13 @@ io.on("connection", (socket) => {
     console.log(`User Disconnected: ${socket.id}`);
   });
 
+ 
+
 
   socket.on("join_room", (data) => {
     var selectedChamp = 0;
-    socket.join(data.room);
     if (!rooms.has(data.room)) {
+      socket.join(data.room);
       selectedChamp = Math.floor(Math.random() * champions.length);
       console.log(champions[selectedChamp].name)
       io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
@@ -77,26 +160,25 @@ io.on("connection", (socket) => {
         round_start: undefined,
         round: 0,
         answered: 0,
-        host: socket.id,
+        host: undefined,
       };
       rooms.set(data.room, room);
-      joinRoom(socket.id, data.user, room);
-      
+      grant_host(socket.id, room);
+    }
+    if (rooms.get(data.room).users.size == max_users) {
+      console.log("room full");
     }
     else {
+      socket.join(data.room);
       selectedChamp = rooms.get(data.room).champion;
-      console.log(champions[selectedChamp].name)
       io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
       joinRoom(socket.id, data.user, rooms.get(data.room));
+      const users = Array.from(rooms.get(data.room).users.values()).map((user) => ({name: user.name, score: user.score}))
+      io.to(data.room).emit("user_list", users)
+      console.log(`User ${socket.id} username ${data.user} has joined room ${data.room}`)
+      //console.log(rooms.get(data.room).users);
+      io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
     }
-
-  
-    const users = Array.from(rooms.get(data.room).users.values()).map((user) => ({name: user.name, score: user.score}))
-    io.to(data.room).emit("user_list", users)
-    console.log(`User ${socket.id} username ${data.user} has joined room ${data.room}`)
-    //console.log(rooms.get(data.room).users);
-    io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
-
   });
 
 
@@ -128,9 +210,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  function change_host(room) {
-
-  }
   function unpixelate(room) {
     io.to(room).emit("depixel");
   }
@@ -153,36 +232,9 @@ io.on("connection", (socket) => {
     }
   }
 
-  function check_round_end(room) {
-    if (room.answered == room.users.length) {
-      console.log('all users guessed (check_round_end)');
-      next_round(room);
-    }
-  }
+  
 
-  //assumes caller already checked that next round should advance
-  function next_round(room) {
-    // console.log(`next_round room: ${room}`)
-    room.champion = Math.floor(Math.random() * champions.length);
-    // console.log(room.champion);
-    // console.log(champions[room.champion].name)
-    room.round_start = new Date();
-    clearTimeout(room.timer);
-    sendScores(room);
-    [...room.users.keys()].forEach((key) => {
-      room.users.get(key).guessed = false;
-    });
-    room.timer = setTimeout(next_round, 20000, room);
-    room.round += 1;
-    io.to(room.name).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[room.champion].url}_0.jpg`)
-    console.log(`Round ${room.round} started`);
-  }
-
-  function sendScores(room) { 
-    //emit users and their scores
-    const users = Array.from(room.users.values()).map((user) => ({name: user.name, score: user.score}))
-    io.to(room.name).emit("scores", users)
-  }
+  
 
   //takes in room 
   function resetGame(room) {
