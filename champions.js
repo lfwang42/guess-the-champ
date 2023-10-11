@@ -56,7 +56,7 @@ const champions = [
     { name: 'Kayle', url: 'Kayle' },
     { name: 'Kayn', url: 'Kayn' },
     { name: 'Kennen', url: 'Kennen' },
-    { name: "Kha'Zix", url: "KhaZix" },
+    { name: "Kha'Zix", url: "Khazix" },
     { name: 'Kindred', url: 'Kindred' },
     { name: 'Kled', url: 'Kled' },
     { name: "Kog'Maw", url: "KogMaw" },
