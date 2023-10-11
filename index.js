@@ -84,7 +84,8 @@ function next_round(room) {
       room.users.get(key).guessed = false;
     });
     room.timer = setTimeout(next_round, 20000, room);
-    io.to(room.name).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[room.champion].url}_0.jpg`)
+    io.to(room.name).emit("next_round")
+    io.to(room.name).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[room.champion].url}_0.jpg`, 0)
     console.log(`Round ${room.round} started`);
   }
 }
@@ -105,7 +106,6 @@ function revoke_host(id, room) {
     console.log(`Room${room.name} already has no host.`);
   }
 }
-
 
 function grant_host(id, room) {
   if (room.host == undefined) {
@@ -149,15 +149,11 @@ io.on("connection", (socket) => {
     var selectedChamp = 0;
     if (!rooms.has(data.room)) {
       socket.join(data.room);
-      selectedChamp = Math.floor(Math.random() * champions.length);
-      console.log(champions[selectedChamp].name)
-      io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
-
       const room = {
         id: uuidv4(),
         name: data.room,
         users: new Map(),
-        champion: selectedChamp,
+        champion: undefined,
         timer: undefined,
         round_start: undefined,
         round: 0,
@@ -172,14 +168,15 @@ io.on("connection", (socket) => {
     }
     else {
       socket.join(data.room);
-      selectedChamp = rooms.get(data.room).champion;
-      io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
       joinRoom(socket.id, data.user, rooms.get(data.room));
-      const users = Array.from(rooms.get(data.room).users.values()).map((user) => ({name: user.name, score: user.score}))
+      const users = Array.from(rooms.get(data.room).users.values()).map((user) => ({name: user.name, score: user.score}));
       io.to(data.room).emit("user_list", users)
       console.log(`User ${socket.id} username ${data.user} has joined room ${data.room}`)
-      //console.log(rooms.get(data.room).users);
-      io.to(data.room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`)
+      if (rooms.get(data.room).round_start != undefined) {
+        selectedChamp = rooms.get(data.room).champion;
+        const curr_time = new Date();
+        io.to(socket.id).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[selectedChamp].url}_0.jpg`, curr_time - rooms.get(data.room).round_start);
+      }
     }
   });
 
@@ -212,10 +209,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  function unpixelate(room) {
-    io.to(room).emit("depixel");
-  }
-
   function handle_guess(room) {
     if (room.users.get(socket.id).guessed == false) {
       const date = new Date();
@@ -234,10 +227,6 @@ io.on("connection", (socket) => {
     }
   }
 
-  
-
-  
-
   //takes in room 
   function resetGame(room) {
     for (let user in room.users.values()) {
@@ -248,6 +237,7 @@ io.on("connection", (socket) => {
     room.answered = 0;
     room.timer = undefined;
     room.round_start = undefined;
+    room.champion = undefined;
     sendScores(room);
   }
 
@@ -256,16 +246,18 @@ io.on("connection", (socket) => {
     if (rooms.get(room).timer !== undefined) {
       clearTimeout(rooms.get(room).timer);
     }
-    
     resetGame(rooms.get(room));
     rooms.get(room).round_start = new Date();
     rooms.get(room).timer = setTimeout(next_round, 10000, rooms.get(room));
     rooms.get(room).round = 1;
+    selectedChamp = Math.floor(Math.random() * champions.length);
+    console.log(champions[selectedChamp].name);
+    rooms.get(room).champion = selectedChamp;
+    io.to(room).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[rooms.get(room).champion].url}_0.jpg`, 0)
     io.to(room).emit("start_game");
   });
 
 });
-
 
 server.listen(3001, () => {
   console.log("SERVER IS RUNNING");
