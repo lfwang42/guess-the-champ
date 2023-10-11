@@ -11,6 +11,7 @@ app.use(cors());
 
 const server = http.createServer(app);
 const max_users = 4;
+const round_limit = 3;
 
 //users are stored in hashmaps of socket.id => UserInfo
 class UserInfo {
@@ -68,20 +69,24 @@ function check_round_end(room) {
 
 //assumes caller already checked that next round should advance
 function next_round(room) {
-  // console.log(`next_round room: ${room}`)
-  room.champion = Math.floor(Math.random() * champions.length);
-  // console.log(room.champion);
-  // console.log(champions[room.champion].name)
-  room.round_start = new Date();
-  clearTimeout(room.timer);
-  sendScores(room);
-  [...room.users.keys()].forEach((key) => {
-    room.users.get(key).guessed = false;
-  });
-  room.timer = setTimeout(next_round, 20000, room);
-  room.round += 1;
-  io.to(room.name).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[room.champion].url}_0.jpg`)
-  console.log(`Round ${room.round} started`);
+  if (room.round == round_limit) {
+    clearTimeout(room.timer);
+    sendScores(room);
+    console.log(`room ${room.name} reached final round.`);
+  }
+  else {
+    room.round += 1;
+    room.champion = Math.floor(Math.random() * champions.length);
+    room.round_start = new Date();
+    clearTimeout(room.timer);
+    sendScores(room);
+    [...room.users.keys()].forEach((key) => {
+      room.users.get(key).guessed = false;
+    });
+    room.timer = setTimeout(next_round, 20000, room);
+    io.to(room.name).emit("champion_url", `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champions[room.champion].url}_0.jpg`)
+    console.log(`Round ${room.round} started`);
+  }
 }
 
 function sendScores(room) { 
@@ -139,9 +144,6 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log(`User Disconnected: ${socket.id}`);
   });
-
- 
-
 
   socket.on("join_room", (data) => {
     var selectedChamp = 0;
