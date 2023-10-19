@@ -10,5 +10,8 @@
     "socket.io": "^4.7.1",
     "util": "^0.12.5",
     "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
