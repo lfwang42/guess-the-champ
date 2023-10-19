@@ -41,17 +41,17 @@ function App() {
 
     return (
       <div style={{textAlign: 'center'}}>
-        <div style={{fontSize: '100px'}}>
+        <div style={{fontSize: '70px'}}>
           <span>{minutes}</span>:<span>{seconds}</span>
         </div>
-        <Button color="secondary" variant='contained' onClick={pause}>Pause</Button>
+        {/* <Button color="secondary" variant='contained' onClick={pause}>Pause</Button>
         <Button color="primary" variant='contained' onClick={resume}>Resume</Button>
         <Button color="warning" variant='contained' onClick={() => {
           // Restarts to 1 minutes timer
           const time = new Date();
           time.setSeconds(time.getSeconds() + 60);
           restart(time)
-        }}>Restart</Button>
+        }}>Restart</Button> */}
       </div>
     );
   }
@@ -151,44 +151,14 @@ function App() {
 
         {start ? 
           <div className='canvas'>
-            <MyTimer expiryTimestamp={time} />
-            <div className='image-champ'>
-              <ImagePixelated  src={randChamp} width={810} height={478} fillTransparencyColor={"grey"} pixelSize={pixels}/>
-            </div>
+            <h2 className="round">Round __ of __</h2>
+            <MyTimer className="timer" expiryTimestamp={time} />
+            <ImagePixelated padding={30} src={randChamp} width={810} height={478} fillTransparencyColor={"grey"} pixelSize={pixels}/>
           </div>
           :
           <div></div>
         }
-
-
         <div className="info-chat">
-
-          <div className="info">
-            <div className="input-row">
-              <input
-                className="room-num"
-                type="text"
-                placeholder="Room Number..."
-                onChange={(event) => {
-                  setRoom(event.target.value);
-                }}
-              />
-              <input
-                className="username"
-                type="text"
-                placeholder="Name"
-                onChange={(event) => {
-                  setName(event.target.value);
-                }}
-              />
-            </div>
-              <div className="button-row">
-                <Button className="join-button" color="secondary" variant="contained" onClick={joinRoom}>
-                  Join Room
-                </Button>
-              </div>
-          </div>
-
           <div className="chat">
             <div>
               CHATBOX
@@ -197,7 +167,6 @@ function App() {
               </div>
             </div>
           </div>
-
         </div>
 
       </div>
@@ -228,3 +197,30 @@ function App() {
 
 export default App;
 */
+
+
+/* <div className="info">
+  <div className="input-row">
+    <input
+      className="room-num"
+      type="text"
+      placeholder="Room Number..."
+      onChange={(event) => {
+        setRoom(event.target.value);
+      }}
+    />
+    <input
+      className="username"
+      type="text"
+      placeholder="Name"
+      onChange={(event) => {
+        setName(event.target.value);
+      }}
+    />
+  </div>
+    <div className="button-row">
+      <Button className="join-button" color="secondary" variant="contained" onClick={joinRoom}>
+        Join Room
+      </Button>
+    </div>
+</div> */
