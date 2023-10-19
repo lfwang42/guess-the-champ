@@ -4,7 +4,6 @@
   "description": "my first socket.io app",
   "dependencies": {
     "express": "^4.18.2",
-    "lol-champions": "^10.23.1",
     "react": "^18.2.0",
     "react-timer-hook": "^3.0.7",
     "socket.io": "^4.7.1",
