@@ -1,10 +1,11 @@
 import "./App.css";
-import io from "socket.io-client";
+import { io, Socket } from "socket.io-client";
+import { ServerToClientEvents, ClientToServerEvents, InterServerEvents, SocketData} from './SocketInterfaces'
+
 import Chat from './components/Chat'
 import { useState } from "react";
 import { useTimer } from 'react-timer-hook';
 import { ImagePixelated } from "react-pixelate"
-import src from "./img1.png"
 import React from 'react'
 import { Typography, Button, Card } from '@mui/material';
 import ButtonAppBar from "./components/Navbar";
@@ -12,8 +13,7 @@ import Scoreboard from "./components/Scoreboard"
 import Modal from "./components/Modal";
 
 
-const socket = io.connect("http://localhost:3001");
-
+const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io("http://localhost:3001/");
 
 function App() {
 
